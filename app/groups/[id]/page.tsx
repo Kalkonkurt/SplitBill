@@ -6,6 +6,7 @@ import GroupDetailsHeader from "@/components/group-details/GroupDetailsHeader";
 import MembersList from "@/components/group-details/MembersList";
 import BalanceSummary from "@/components/group-details/BalanceSummary";
 import ExpenseList from "@/components/group-details/ExpenseList";
+import EditExpenseForm from "@/components/expenses/EditExpenseForm";
 
 type Group = {
   _id: string;
@@ -21,6 +22,7 @@ type Expense = {
   paidBy: string;
   category: string;
   groupId: string;
+  splitBetween?: string[];
 };
 
 type Balance = {
@@ -43,6 +45,8 @@ export default function GroupDetailsPage({
   const [group, setGroup] = useState<Group | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [balances, setBalances] = useState<Balance[]>([]);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -71,14 +75,14 @@ export default function GroupDetailsPage({
         const expensesData: Expense[] =
           await expensesResponse.json();
 
-        // Only show expenses belonging to this group
+        // Only show expenses from this group
         const groupExpenses = expensesData.filter(
           (expense) => expense.groupId === id
         );
 
         setExpenses(groupExpenses);
 
-        // Balance calculation will be added next
+        // Balance calculation will be added later
         setBalances([]);
       } catch (error) {
         console.error(error);
@@ -91,12 +95,65 @@ export default function GroupDetailsPage({
     fetchGroupData();
   }, [id]);
 
-  function handleEdit(id: string) {
-    console.log("Edit expense:", id);
+  function handleEdit(expenseId: string) {
+    // Find the selected expense
+    const expense = expenses.find(
+      (expense) => expense._id === expenseId
+    );
+
+    if (expense) {
+      setEditingExpense(expense);
+    }
   }
 
-  function handleDelete(id: string) {
-    console.log("Delete expense:", id);
+  async function handleDelete(expenseId: string) {
+    try {
+      // Delete the expense
+      const response = await fetch(
+        `/api/expenses/${expenseId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete expense");
+      }
+
+      // Remove it from the page
+      setExpenses((currentExpenses) =>
+        currentExpenses.filter(
+          (expense) => expense._id !== expenseId
+        )
+      );
+    } catch (error) {
+      console.error("Failed to delete expense:", error);
+    }
+  }
+
+  async function refreshExpenses() {
+    try {
+      // Get updated expenses
+      const response = await fetch("/api/expenses");
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch expenses");
+      }
+
+      const data: Expense[] = await response.json();
+
+      // Only keep expenses from this group
+      const groupExpenses = data.filter(
+        (expense) => expense.groupId === id
+      );
+
+      setExpenses(groupExpenses);
+
+      // Close the edit form
+      setEditingExpense(null);
+    } catch (error) {
+      console.error("Failed to refresh expenses:", error);
+    }
   }
 
   if (loading) {
@@ -121,6 +178,15 @@ export default function GroupDetailsPage({
       <MembersList members={group.members} />
 
       <BalanceSummary balances={balances} />
+
+      {editingExpense && (
+        <EditExpenseForm
+          expense={editingExpense}
+          members={group.members}
+          onUpdated={refreshExpenses}
+          onCancel={() => setEditingExpense(null)}
+        />
+      )}
 
       <ExpenseList
         expenses={expenses}
