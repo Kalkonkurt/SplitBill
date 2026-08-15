@@ -4,21 +4,25 @@ import { useState } from 'react';
 import Link from 'next/link';
 import type { FormEvent } from 'react';
 
-export default function LoginPage() {
+export default function SignupPage() {
 	const router = useRouter();
 
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
+	const [confirmPassword, setConfirmPassword] = useState('');
 	const [error, setError] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	async function handleSubmit(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		setError(null);
+		if (password !== confirmPassword) {
+			setError('passwords must match');
+			return;
+		}
 		setIsSubmitting(true);
-
 		try {
-			const res = await fetch('/api/login', {
+			const res = await fetch('/api/signup', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ email, password })
@@ -39,7 +43,7 @@ export default function LoginPage() {
 		<main className="flex flex-1 items-center justify-center p-4">
 			<div className="card w-full max-w-sm bg-base-100 shadow-xl">
 				<div className="card-body p-8">
-					<h1 className="card-title">Login</h1>
+					<h1 className="card-title">Sign in</h1>
 					<form onSubmit={handleSubmit} className="flex flex-col gap-2">
 						<fieldset className="fieldset">
 							<legend className="fieldset-legend sr-only">Email</legend>
@@ -58,12 +62,25 @@ export default function LoginPage() {
 							<input
 								type="password"
 								required
-								autoComplete="current-password"
+								autoComplete="new-password"
 								className="input w-full rounded-2xl"
 								placeholder="Password (min 8 characters)"
 								minLength={8}
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
+							/>
+						</fieldset>
+						<fieldset className="fieldset">
+							<legend className="fieldset-legend sr-only">Confirm password</legend>
+							<input
+								type="password"
+								required
+								autoComplete="new-password"
+								className="input w-full rounded-2xl"
+								placeholder="Confirm password"
+								minLength={8}
+								value={confirmPassword}
+								onChange={(e) => setConfirmPassword(e.target.value)}
 							/>
 						</fieldset>
 						{error && (
@@ -77,13 +94,13 @@ export default function LoginPage() {
 							disabled={isSubmitting}
 						>
 							{isSubmitting && <span className="loading loading-spinner" />}
-							{isSubmitting ? 'Logging in...' : 'Log in'}
+							{isSubmitting ? 'Creating account...' : 'Sign up'}
 						</button>
 					</form>
 					<p className="text-sm mt-2">
-						Don't have an account?{' '}
-						<Link href="/signup" className="link link-primary">
-							Sign up
+						Already have an account?{' '}
+						<Link href="/login" className="link link-primary">
+							Log in
 						</Link>
 					</p>
 				</div>
