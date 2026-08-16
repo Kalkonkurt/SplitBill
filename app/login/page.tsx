@@ -1,8 +1,13 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import Link from 'next/link';
-import type { FormEvent } from 'react';
+import type { SubmitEvent } from 'react';
+
+import AuthCard from '@/components/AuthCard';
+import FormField from '@/components/FormField';
+import ErrorAlert from '@/components/ErrorAlert';
+import SubmitButton from '@/components/SubmitButton';
+import AuthFooterLink from '@/components/AuthFooterLink';
 
 export default function LoginPage() {
 	const router = useRouter();
@@ -12,7 +17,7 @@ export default function LoginPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+	async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
 		e.preventDefault();
 		setError(null);
 		setIsSubmitting(true);
@@ -36,58 +41,29 @@ export default function LoginPage() {
 		}
 	}
 	return (
-		<main className="flex flex-1 items-center justify-center p-4">
-			<div className="card w-full max-w-sm bg-base-100 shadow-xl">
-				<div className="card-body p-8">
-					<h1 className="card-title">Login</h1>
-					<form onSubmit={handleSubmit} className="flex flex-col gap-2">
-						<fieldset className="fieldset">
-							<legend className="fieldset-legend sr-only">Email</legend>
-							<input
-								type="email"
-								required
-								autoComplete="email"
-								className="input w-full rounded-2xl"
-								placeholder="you@example.com"
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
-							/>
-						</fieldset>
-						<fieldset className="fieldset">
-							<legend className="fieldset-legend sr-only">Password</legend>
-							<input
-								type="password"
-								required
-								autoComplete="current-password"
-								className="input w-full rounded-2xl"
-								placeholder="Password (min 8 characters)"
-								minLength={8}
-								value={password}
-								onChange={(e) => setPassword(e.target.value)}
-							/>
-						</fieldset>
-						{error && (
-							<div className="alert alert-error text-sm">
-								<span>{error}</span>
-							</div>
-						)}
-						<button
-							type="submit"
-							className="btn btn-primary w-full rounded-2xl mt-2"
-							disabled={isSubmitting}
-						>
-							{isSubmitting && <span className="loading loading-spinner" />}
-							{isSubmitting ? 'Logging in...' : 'Log in'}
-						</button>
-					</form>
-					<p className="text-sm mt-2">
-						Don't have an account?{' '}
-						<Link href="/signup" className="link link-primary">
-							Sign up
-						</Link>
-					</p>
-				</div>
-			</div>
-		</main>
+		<AuthCard title="Login">
+			<form onSubmit={handleSubmit} className="flex flex-col gap-2">
+				<FormField
+					label="Email"
+					type="email"
+					placeholder="you@example.com"
+					autoComplete="email"
+					value={email}
+					onChange={(e) => setEmail(e.target.value)}
+				/>
+				<FormField
+					label="Password"
+					type="password"
+					placeholder="Password (min 8 characters)"
+					autoComplete="current-password"
+					minLength={8}
+					value={password}
+					onChange={(e) => setPassword(e.target.value)}
+				/>
+				{error && <ErrorAlert message={error} />}
+				<SubmitButton isSubmitting={isSubmitting} idleText="Log in" loadingText="Logging in..." />
+			</form>
+			<AuthFooterLink question="Don't have an account?" href="/signup" linkText="Sign up" />
+		</AuthCard>
 	);
 }
