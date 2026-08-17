@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { verifySession, sessionCookieName } from '@/lib/auth';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { User } from '@/models/Users';
 
 export async function GET() {
 	try {
@@ -20,7 +21,7 @@ export async function GET() {
 		}
 
 		const client = await clientPromise;
-		const users = client.db(process.env.MONGODB_DB).collection('users');
+		const users = client.db(process.env.MONGODB_DB).collection<User>('users');
 
 		const user = await users.findOne({ _id: new ObjectId(session.userId) });
 
