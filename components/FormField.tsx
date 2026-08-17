@@ -8,6 +8,9 @@ type FormFieldProps = {
 	value: string;
 	onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 	minLength?: number;
+	required?: boolean;
+	pattern?: string;
+	title?: string;
 };
 
 export default function FormField({
@@ -17,7 +20,10 @@ export default function FormField({
 	autoComplete,
 	value,
 	onChange,
-	minLength
+	minLength,
+	required = true,
+	pattern,
+	title
 }: FormFieldProps) {
 	return (
 		<fieldset className="fieldset">
@@ -25,12 +31,14 @@ export default function FormField({
 			<input
 				className="input w-full rounded-2xl"
 				type={type}
-				required
+				required={required}
 				placeholder={placeholder}
 				autoComplete={autoComplete}
 				value={value}
 				onChange={onChange}
 				minLength={minLength}
+				pattern={pattern}
+				title={title}
 			/>
 		</fieldset>
 	);

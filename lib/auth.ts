@@ -1,4 +1,5 @@
 import { SignJWT, jwtVerify } from 'jose';
+import { cookies } from 'next/headers';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -31,4 +32,15 @@ export async function verifySession(token: string): Promise<SessionPayload | nul
 	} catch {
 		return null;
 	}
+}
+
+export async function getCurrentSession(): Promise<SessionPayload | null> {
+	const cookieStore = await cookies();
+	const sessionCookie = cookieStore.get(sessionCookieName);
+
+	if (!sessionCookie) {
+		return null;
+	}
+
+	return await verifySession(sessionCookie.value);
 }
