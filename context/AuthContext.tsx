@@ -15,6 +15,7 @@ type AuthUserContextType = {
 	user: AuthUser | null;
 	loading: boolean;
 	refetchUser: () => Promise<void>;
+	clearUser: () => void;
 };
 
 export const AuthUserContext = createContext<AuthUserContextType | undefined>(undefined);
@@ -38,12 +39,16 @@ export function AuthUserProvider({ children }: { children: React.ReactNode }) {
 		}
 	}, []);
 
+	const clearUser = useCallback(() => {
+		setUser(null);
+	}, []);
+
 	useEffect(() => {
 		fetchUser();
 	}, [fetchUser]);
 
 	return (
-		<AuthUserContext.Provider value={{ user, loading, refetchUser: fetchUser }}>
+		<AuthUserContext.Provider value={{ user, loading, refetchUser: fetchUser, clearUser }}>
 			{children}
 		</AuthUserContext.Provider>
 	);
