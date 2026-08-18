@@ -16,7 +16,7 @@ export default function MyExpensesCard({ user }: { user: AuthUser }) {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	const myName = user.displayName || user.email;
+	const myMatchName = user.displayName || user.email;
 
 	useEffect(() => {
 		fetch('/api/expenses')
@@ -27,12 +27,12 @@ export default function MyExpensesCard({ user }: { user: AuthUser }) {
 				return res.json();
 			})
 			.then((data: Expense[]) => {
-				const mine = data.filter((expense) => expense.paidBy === myName);
+				const mine = data.filter((expense) => expense.paidBy === myMatchName);
 				setExpenses(mine);
 			})
 			.catch(() => setError('Could not load expenses'))
 			.finally(() => setLoading(false));
-	}, [myName]);
+	}, [myMatchName]);
 
 	const total = useMemo(() => expenses.reduce((sum, expense) => sum + expense.amount, 0), [expenses]);
 
