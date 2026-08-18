@@ -50,6 +50,9 @@ export async function PATCH(request: Request) {
 
 		const body = await request.json();
 
+		const client = await clientPromise;
+		const users = client.db(process.env.MONGODB_DB).collection<User>('users');
+
 		const updateFields: Partial<Pick<User, 'firstName' | 'lastName' | 'displayName' | 'phone' | 'avatarUrl'>> =
 			{};
 
@@ -60,6 +63,15 @@ export async function PATCH(request: Request) {
 			updateFields.lastName = body.lastName;
 		}
 		if (typeof body.displayName === 'string') {
+			if (body.displayName.trim() !== '') {
+				const existing = await users.findOne({
+					displayName: body.displayName,
+					_id: { $ne: new ObjectId(session.userId) }
+				});
+				if (existing) {
+					return NextResponse.json({ error: 'This display name is already taken' }, { status: 409 });
+				}
+			}
 			updateFields.displayName = body.displayName;
 		}
 		if (typeof body.phone === 'string') {
@@ -76,9 +88,6 @@ export async function PATCH(request: Request) {
 		if (Object.keys(updateFields).length === 0) {
 			return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
 		}
-
-		const client = await clientPromise;
-		const users = client.db(process.env.MONGODB_DB).collection<User>('users');
 
 		const result = await users.updateOne({ _id: new ObjectId(session.userId) }, { $set: updateFields });
 
