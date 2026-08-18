@@ -7,6 +7,7 @@ type ProfileInfoCardProps = {
 
 export default function ProfileInfoCard({ user, onEditClick }: ProfileInfoCardProps) {
 	const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ');
+	const initials = (user.firstName?.[0] ?? user.email[0]).toUpperCase();
 
 	return (
 		<section aria-labelledby="my-info-title" className="h-full">
@@ -20,6 +21,18 @@ export default function ProfileInfoCard({ user, onEditClick }: ProfileInfoCardPr
 							Edit
 						</button>
 					</div>
+
+					{user.avatarUrl ? (
+						<img
+							src={user.avatarUrl}
+							alt={`${fullName || user.email}'s profile picture`}
+							className="w-20 h-20 rounded-full object-cover self-start"
+						/>
+					) : (
+						<div className="w-20 h-20 rounded-full bg-primary text-primary-content flex items-center justify-center text-xl font-bold self-start">
+							{initials}
+						</div>
+					)}
 
 					<dl className="flex flex-col gap-3">
 						<div>

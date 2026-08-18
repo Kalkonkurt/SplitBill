@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type SubmitEvent } from 'react';
+import { useState, type ChangeEvent, type SubmitEvent } from 'react';
 import type { AuthUser } from '@/context/AuthContext';
 import { useAuthUser } from '@/hooks/useAuth';
 import FormField from '@/components/FormField';
@@ -19,10 +19,32 @@ export default function ProfileCard({ user, onSuccess }: ProfileCardProps) {
 	const [lastName, setLastName] = useState(user.lastName ?? '');
 	const [displayName, setDisplayName] = useState(user.displayName ?? '');
 	const [phone, setPhone] = useState(user.phone ?? '');
+	const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl ?? '');
 
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState(false);
+
+	function handleAvatarChange(e: ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		if (!file.type.startsWith('image/')) {
+			setError('Please select an image file');
+			return;
+		}
+
+		const MAX_SIZE = 2 * 1024 * 1024;
+		if (file.size > MAX_SIZE) {
+			setError('Image must be smaller than 2MB');
+			return;
+		}
+
+		setError(null);
+		const reader = new FileReader();
+		reader.onload = () => setAvatarUrl(reader.result as string);
+		reader.readAsDataURL(file);
+	}
 
 	async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
 		e.preventDefault();
@@ -34,7 +56,7 @@ export default function ProfileCard({ user, onSuccess }: ProfileCardProps) {
 			const res = await fetch('/api/me', {
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ firstName, lastName, displayName, phone })
+				body: JSON.stringify({ firstName, lastName, displayName, phone, avatarUrl })
 			});
 			const data = await res.json();
 
@@ -60,6 +82,20 @@ export default function ProfileCard({ user, onSuccess }: ProfileCardProps) {
 					<h2 className="card-title">Edit Info</h2>
 
 					<form onSubmit={handleSubmit} className="flex flex-col gap-2">
+						{avatarUrl && (
+							<img
+								src={avatarUrl}
+								alt="Profile picture preview"
+								className="w-20 h-20 rounded-full object-cover self-center"
+							/>
+						)}
+						<input
+							type="file"
+							accept="image/*"
+							onChange={handleAvatarChange}
+							className="file-input file-input-sm w-full"
+						/>
+
 						<FormField
 							label="First name"
 							type="text"

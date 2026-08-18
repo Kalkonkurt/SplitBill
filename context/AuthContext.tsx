@@ -8,6 +8,7 @@ export type AuthUser = {
 	lastName?: string;
 	displayName?: string;
 	phone?: string;
+	avatarUrl?: string;
 	createdAt: string;
 };
 

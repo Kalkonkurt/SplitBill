@@ -29,6 +29,7 @@ export async function GET() {
 				lastName: user.lastName,
 				displayName: user.displayName,
 				phone: user.phone,
+				avatarUrl: user.avatarUrl,
 				createdAt: user.createdAt
 			},
 			{ status: 200 }
@@ -49,7 +50,8 @@ export async function PATCH(request: Request) {
 
 		const body = await request.json();
 
-		const updateFields: Partial<Pick<User, 'firstName' | 'lastName' | 'displayName' | 'phone'>> = {};
+		const updateFields: Partial<Pick<User, 'firstName' | 'lastName' | 'displayName' | 'phone' | 'avatarUrl'>> =
+			{};
 
 		if (typeof body.firstName === 'string') {
 			updateFields.firstName = body.firstName;
@@ -62,6 +64,13 @@ export async function PATCH(request: Request) {
 		}
 		if (typeof body.phone === 'string') {
 			updateFields.phone = body.phone;
+		}
+		if (typeof body.avatarUrl === 'string') {
+			const MAX_AVATAR_LENGTH = 3_000_000;
+			if (body.avatarUrl.length > MAX_AVATAR_LENGTH) {
+				return NextResponse.json({ error: 'Image is too large' }, { status: 400 });
+			}
+			updateFields.avatarUrl = body.avatarUrl;
 		}
 
 		if (Object.keys(updateFields).length === 0) {
