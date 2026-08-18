@@ -4,16 +4,26 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import useLogout from '@/hooks/useLogout';
+import { useTheme } from '@/hooks/useTheme';
+import { useFontSize } from '@/hooks/useFontSize';
 
 const navItems = [
 	{ href: '/dashboard', label: 'Dashboard' },
 	{ href: '/profile', label: 'Profile' }
 ];
 
+const FONT_SIZE_LABELS = {
+	normal: 'Medium',
+	large: 'Large',
+	xlarge: 'Extra large'
+};
+
 export default function AppShell({ children }: { children: ReactNode }) {
 	const pathname = usePathname();
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const handleLogout = useLogout();
+	const { theme, toggleTheme } = useTheme();
+	const { fontSize, cycleFontSize } = useFontSize();
 
 	return (
 		<div className="flex flex-col md:flex-row min-h-screen">
@@ -70,9 +80,23 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
 					<button
 						type="button"
-						onClick={handleLogout}
+						onClick={toggleTheme}
+						aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
 						className="btn btn-ghost rounded-lg md:mt-auto"
 					>
+						{theme === 'light' ? '◉ Dark mode' : 'Ο Light mode'}
+					</button>
+
+					<button
+						type="button"
+						onClick={cycleFontSize}
+						aria-label="Change text size"
+						className="btn btn-ghost rounded-lg"
+					>
+						Text size: {FONT_SIZE_LABELS[fontSize]}
+					</button>
+
+					<button type="button" onClick={handleLogout} className="btn btn-ghost rounded-lg">
 						Log out
 					</button>
 
