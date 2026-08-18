@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import clientPromise from '@/lib/mongodb';
 import { signSession, sessionCookieName } from '@/lib/auth';
+import { User } from '@/models/Users';
 
 export async function POST(request: Request) {
 	try {
@@ -13,7 +14,7 @@ export async function POST(request: Request) {
 		}
 
 		const client = await clientPromise;
-		const users = client.db(process.env.MONGODB_DB).collection('users');
+		const users = client.db(process.env.MONGODB_DB).collection<User>('users');
 
 		const user = await users.findOne({ email });
 

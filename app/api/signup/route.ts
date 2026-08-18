@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import clientPromise from '@/lib/mongodb';
 import { signSession, sessionCookieName } from '@/lib/auth';
+import { User } from '@/models/Users';
 function isValidEmail(email: string): boolean {
 	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
 		}
 
 		const client = await clientPromise;
-		const users = client.db(process.env.MONGODB_DB).collection('users');
+		const users = client.db(process.env.MONGODB_DB).collection<User>('users');
 
 		if (await users.findOne({ email })) {
 			return NextResponse.json({ error: 'An account with that email already exists' }, { status: 409 });

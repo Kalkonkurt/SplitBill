@@ -8,9 +8,11 @@ import FormField from '@/components/FormField';
 import ErrorAlert from '@/components/ErrorAlert';
 import SubmitButton from '@/components/SubmitButton';
 import AuthFooterLink from '@/components/AuthFooterLink';
+import { useAuthUser } from '@/hooks/useAuth';
 
 export default function LoginPage() {
 	const router = useRouter();
+	const { refetchUser } = useAuthUser();
 
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
@@ -34,6 +36,7 @@ export default function LoginPage() {
 				setIsSubmitting(false);
 				return;
 			}
+			await refetchUser();
 			router.push('/dashboard');
 		} catch (error) {
 			setError('Could not reach the server. Please try again.');
