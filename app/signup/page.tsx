@@ -40,7 +40,7 @@ export default function SignupPage() {
 				setIsSubmitting(false);
 				return;
 			}
-			await refetchUser();
+			refetchUser();
 			router.push('/dashboard');
 		} catch (error) {
 			setError('Could not reach the server. Please try again.');
